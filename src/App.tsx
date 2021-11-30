@@ -1,7 +1,14 @@
-import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing";
 
 function App() {
-  return <div className="App">Hello world</div>;
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+    </Routes>
+  );
 }
 
 export default App;
