@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Location } from "../types/location";
+import { GeoLocation } from "../types/geolocation";
 import { Nullable } from "../types/nullable";
 
-export default function useGeoLocation(): Nullable<Location> {
-  const [location, setLocation] = useState<Nullable<Location>>(null);
+export default function useGeoLocation(): Nullable<GeoLocation> {
+  const [location, setLocation] = useState<Nullable<GeoLocation>>(null);
 
   navigator.geolocation.getCurrentPosition((pos) => {
     setLocation({
