@@ -9,11 +9,39 @@ import {
   Box,
 } from "@mui/material";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
+type DrawerListItem = {
+  text: string;
+  link: string;
+  icon: JSX.Element;
+};
+
+const drawerListMainItems: DrawerListItem[] = [
+  { text: "Dashboard", link: "/dashboard", icon: <InboxIcon /> },
+  { text: "Friends", link: "/friends", icon: <InboxIcon /> },
+  { text: "Past Hangouts", link: "/historyg", icon: <InboxIcon /> },
+];
+
+const drawerListSecondaryItems: DrawerListItem[] = [
+  { text: "Settings", link: "/settings", icon: <InboxIcon /> },
+  { text: "Log out", link: "/logout", icon: <InboxIcon /> },
+];
+
 export default function AppDrawer() {
+  const navigate = useNavigate();
+
+  function makeDrawerListItem(item: DrawerListItem) {
+    return (
+      <ListItem button key={item.text} onClick={() => navigate(item.link)}>
+        <ListItemIcon>{item.icon}</ListItemIcon>
+        <ListItemText primary={item.text} />
+      </ListItem>
+    );
+  }
+
   return (
     <Drawer
       variant="permanent"
@@ -25,27 +53,9 @@ export default function AppDrawer() {
     >
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
-        <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
+        <List>{drawerListMainItems.map(makeDrawerListItem)}</List>
         <Divider />
-        <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
+        <List>{drawerListSecondaryItems.map(makeDrawerListItem)}</List>
       </Box>
     </Drawer>
   );
