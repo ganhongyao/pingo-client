@@ -2,6 +2,8 @@ import { CssBaseline, AppBar, Toolbar, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Box } from "@mui/system";
 import { ReactNode } from "react";
+import { Routes, Route } from "react-router";
+import Dashboard from "../pages/Dashboard";
 import AppDrawer from "./AppDrawer";
 
 const useStyles = makeStyles((theme) => ({
@@ -12,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface OwnProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export default function AppShell({ children }: OwnProps) {
@@ -37,7 +39,9 @@ export default function AppShell({ children }: OwnProps) {
         sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
       >
         <Toolbar />
-        {children ?? {}}
+        <Routes>
+          <Route element={<Dashboard />} path="dashboard" />
+        </Routes>
       </Box>
     </Box>
   );
