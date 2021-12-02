@@ -7,3 +7,5 @@ export const DEFAULT_MAP_CENTER: GeoLocation = {
 
 export const MAPBOX_STYLE =
   "mapbox://styles/ganhongyao/ckwnnjipi9szk15p7h646a8vk";
+
+export const SOCKET_URL = "http://localhost:4001";
