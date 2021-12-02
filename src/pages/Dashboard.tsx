@@ -4,23 +4,19 @@ import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import { GeoLocation } from "../types/geolocation";
 import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
-import socketIOClient from "socket.io-client";
+import { useSocket } from "../hooks/useSocket";
+import { useSnackbar } from "notistack";
 
 function Dashboard() {
   const location = useGeoLocation();
+  const socket = useSocket();
+  const { enqueueSnackbar } = useSnackbar();
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
     height: "80vh",
     zoom: 12,
   });
-
-  useEffect(() => {
-    const socket = socketIOClient("http://localhost:4001");
-    socket.on("friend connection", (data) => {
-      console.log("a friend connected");
-    });
-  }, []);
 
   useEffect(() => {
     if (location) {
@@ -31,6 +27,16 @@ function Dashboard() {
       }));
     }
   }, [location]);
+
+  useEffect(() => {
+    socket?.on("friend connection", () => {
+      console.log("friend connected");
+      enqueueSnackbar("Friend is online!", { variant: "success" });
+    });
+    return () => {
+      socket?.off("friend connection");
+    };
+  });
 
   if (!location) {
     return <div>Location not enabled.</div>;
