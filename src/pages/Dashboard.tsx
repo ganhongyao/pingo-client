@@ -18,6 +18,7 @@ function Dashboard() {
     zoom: 12,
   });
 
+  // Get the current location of the user
   useEffect(() => {
     if (location) {
       setViewport((prevViewport) => ({
@@ -25,9 +26,13 @@ function Dashboard() {
         latitude: location.latitude,
         longitude: location.longitude,
       }));
+
+      // Update server on location
+      socket?.emit("location update", location);
     }
   }, [location]);
 
+  // Listen for friend connections
   useEffect(() => {
     socket?.on("friend connection", () => {
       console.log("friend connected");
