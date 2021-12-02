@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import { GeoLocation } from "../types/geolocation";
 import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
+import socketIOClient from "socket.io-client";
 
 function Dashboard() {
   const location = useGeoLocation();
@@ -13,6 +14,13 @@ function Dashboard() {
     height: "80vh",
     zoom: 12,
   });
+
+  useEffect(() => {
+    const socket = socketIOClient("http://localhost:4001");
+    socket.on("friend connection", (data) => {
+      console.log("a friend connected");
+    });
+  }, []);
 
   useEffect(() => {
     if (location) {
