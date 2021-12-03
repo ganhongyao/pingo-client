@@ -27,20 +27,16 @@ function Dashboard() {
     zoom: 12,
   });
 
-  const updateLocationOnServer = () => {
+  const isUpdateDue = (lastUpdated: number): boolean => {
+    // Socket not available yet, unable to update anyway
+    if (!socket) {
+      return false;
+    }
+
     const now = Date.now();
     const timeElapsed = now - lastUpdated;
-    if (timeElapsed > LOCATION_UPDATE_TIME_INTERVAL) {
-      socket?.emit("location update", location);
-      setLastUpdated(now);
-    }
-    return;
+    return timeElapsed > LOCATION_UPDATE_TIME_INTERVAL;
   };
-
-  useEffect(() => {
-    socket?.emit("location update", location);
-    socket?.emit("query friend locations");
-  }, [socket]);
 
   // Get the current location of the user
   useEffect(() => {
@@ -51,9 +47,14 @@ function Dashboard() {
         longitude: location.longitude,
       }));
 
-      updateLocationOnServer();
+      if (isUpdateDue(lastUpdated)) {
+        socket?.emit("location update", location);
+        socket?.emit("query friend locations");
+
+        setLastUpdated(Date.now());
+      }
     }
-  }, [location]);
+  }, [socket, location]);
 
   // Listen for friend connections
   useEffect(() => {
@@ -63,6 +64,7 @@ function Dashboard() {
 
     socket?.on("friend connection", () => {
       enqueueSnackbar("Friend is online!", { variant: "success" });
+      socket?.emit("query friend locations");
     });
 
     socket?.on("friend location update", (location) => {
@@ -74,11 +76,13 @@ function Dashboard() {
       socket?.off("friend locations");
       socket?.off("friend location update");
     };
-  });
+  }, [socket]);
 
   if (!location) {
     return <div>Location not enabled.</div>;
   }
+
+  console.log(onlineUsers);
 
   return (
     <>
@@ -89,8 +93,9 @@ function Dashboard() {
         onViewportChange={setViewport}
       >
         {onlineUsers.map((user, index) => {
-          console.log(user);
-          return (
+          return user.location &&
+            user.location.latitude &&
+            user.location.longitude ? (
             <Marker
               key={index}
               latitude={user.location.latitude}
@@ -102,7 +107,7 @@ function Dashboard() {
                 <FaceIcon />
               </IconButton>
             </Marker>
-          );
+          ) : null;
         })}
       </ReactMapGL>
 
