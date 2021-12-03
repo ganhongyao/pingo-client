@@ -37,6 +37,11 @@ function Dashboard() {
     return;
   };
 
+  useEffect(() => {
+    socket?.emit("location update", location);
+    socket?.emit("query friend locations");
+  }, [socket]);
+
   // Get the current location of the user
   useEffect(() => {
     if (location) {
@@ -52,14 +57,20 @@ function Dashboard() {
 
   // Listen for friend connections
   useEffect(() => {
+    socket?.on("friend locations", (data) => {
+      console.log(data);
+    });
+
     socket?.on("friend connection", () => {
       enqueueSnackbar("Friend is online!", { variant: "success" });
     });
     socket?.on("friend location update", (location) => {
-      console.log("friend updated location: " + location);
+      console.log("Friend updated location" + location);
     });
+
     return () => {
       socket?.off("friend connection");
+      socket?.off("friend locations");
       socket?.off("friend location update");
     };
   });
