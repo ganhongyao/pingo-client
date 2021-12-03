@@ -6,6 +6,8 @@ import { GeoLocation } from "../types/geolocation";
 import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
 import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
+import { IconButton } from "@mui/material";
+import FaceIcon from "@mui/icons-material/Face";
 
 function Dashboard() {
   const location = useGeoLocation();
@@ -64,7 +66,9 @@ function Dashboard() {
             latitude={marker.latitude}
             longitude={marker.longitude}
           >
-            <img src="/avatar.png" width="25" height="25" />
+            <IconButton color="default">
+              <FaceIcon />
+            </IconButton>
           </Marker>
         ))}
       </ReactMapGL>
