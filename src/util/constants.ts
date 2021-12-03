@@ -9,3 +9,5 @@ export const MAPBOX_STYLE =
   "mapbox://styles/ganhongyao/ckwnnjipi9szk15p7h646a8vk";
 
 export const SOCKET_URL = "http://localhost:4001";
+
+export const LOCATION_UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 1 minute

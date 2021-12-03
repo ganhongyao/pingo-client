@@ -3,11 +3,18 @@ import ReactMapGL, { Marker } from "react-map-gl";
 import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import { GeoLocation } from "../types/geolocation";
-import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
+import {
+  DEFAULT_MAP_CENTER,
+  LOCATION_UPDATE_TIME_INTERVAL,
+  MAPBOX_STYLE,
+} from "../util/constants";
 import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
 import { Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
+
+// TODO: Find better way to handle this
+let lastUpdated: number = 0;
 
 function Dashboard() {
   const location = useGeoLocation();
@@ -20,6 +27,16 @@ function Dashboard() {
     zoom: 12,
   });
 
+  const updateLocationOnServer = () => {
+    const now = Date.now();
+    const timeElapsed = now - lastUpdated;
+    if (timeElapsed > LOCATION_UPDATE_TIME_INTERVAL) {
+      socket?.emit("location update", location);
+      lastUpdated = now;
+    }
+    return;
+  };
+
   // Get the current location of the user
   useEffect(() => {
     if (location) {
@@ -29,19 +46,21 @@ function Dashboard() {
         longitude: location.longitude,
       }));
 
-      // Update server on location
-      socket?.emit("location update", location);
+      updateLocationOnServer();
     }
   }, [location]);
 
   // Listen for friend connections
   useEffect(() => {
     socket?.on("friend connection", () => {
-      console.log("friend connected");
       enqueueSnackbar("Friend is online!", { variant: "success" });
+    });
+    socket?.on("friend location update", (location) => {
+      console.log("friend updated location: " + location);
     });
     return () => {
       socket?.off("friend connection");
+      socket?.off("friend location update");
     };
   });
 
