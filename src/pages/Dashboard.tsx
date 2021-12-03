@@ -13,13 +13,11 @@ import { useSnackbar } from "notistack";
 import { Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 
-// TODO: Find better way to handle this
-let lastUpdated: number = 0;
-
 function Dashboard() {
   const location = useGeoLocation();
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
+  const [lastUpdated, setLastUpdated] = useState(0);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -32,7 +30,7 @@ function Dashboard() {
     const timeElapsed = now - lastUpdated;
     if (timeElapsed > LOCATION_UPDATE_TIME_INTERVAL) {
       socket?.emit("location update", location);
-      lastUpdated = now;
+      setLastUpdated(now);
     }
     return;
   };
@@ -64,8 +62,9 @@ function Dashboard() {
     socket?.on("friend connection", () => {
       enqueueSnackbar("Friend is online!", { variant: "success" });
     });
+
     socket?.on("friend location update", (location) => {
-      console.log("Friend updated location" + location);
+      console.log("Friend updated location");
     });
 
     return () => {
