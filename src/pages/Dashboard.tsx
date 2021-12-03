@@ -6,7 +6,7 @@ import { GeoLocation } from "../types/geolocation";
 import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
 import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
-import { IconButton } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 
 function Dashboard() {
@@ -16,7 +16,7 @@ function Dashboard() {
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
-    height: "80vh",
+    height: "75vh",
     zoom: 12,
   });
 
@@ -72,6 +72,22 @@ function Dashboard() {
           </Marker>
         ))}
       </ReactMapGL>
+
+      {/* Legend */}
+      <Grid container direction="row" spacing={1}>
+        <Grid item>
+          <FaceIcon color="action" />
+        </Grid>
+        <Grid item>
+          <Typography>You</Typography>
+        </Grid>
+        <Grid item>
+          <FaceIcon color="info" />
+        </Grid>
+        <Grid item>
+          <Typography>Friend</Typography>
+        </Grid>
+      </Grid>
     </>
   );
 }
