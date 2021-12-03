@@ -69,6 +69,7 @@ function Dashboard() {
 
     socket?.on("friend location update", (location) => {
       console.log("Friend updated location");
+      socket.emit("query friend locations");
     });
 
     return () => {
