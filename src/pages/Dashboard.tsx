@@ -2,7 +2,6 @@ import useGeoLocation from "../hooks/useGeoLocation";
 import ReactMapGL, { Marker } from "react-map-gl";
 import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
-import { GeoLocation } from "../types/geolocation";
 import {
   DEFAULT_MAP_CENTER,
   LOCATION_UPDATE_TIME_INTERVAL,
@@ -12,12 +11,15 @@ import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
 import { Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
+import { ClientSocket } from "../types/clientSocket";
 
 function Dashboard() {
   const location = useGeoLocation();
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
+
   const [lastUpdated, setLastUpdated] = useState(0);
+  const [onlineUsers, setOnlineUsers] = useState<ClientSocket[]>([]);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -56,7 +58,7 @@ function Dashboard() {
   // Listen for friend connections
   useEffect(() => {
     socket?.on("friend locations", (data) => {
-      console.log(data);
+      setOnlineUsers(data);
     });
 
     socket?.on("friend connection", () => {
@@ -78,9 +80,6 @@ function Dashboard() {
     return <div>Location not enabled.</div>;
   }
 
-  // TODO: Add friends' markers here as well
-  const markers: GeoLocation[] = [location];
-
   return (
     <>
       <ReactMapGL
@@ -89,17 +88,22 @@ function Dashboard() {
         mapStyle={MAPBOX_STYLE}
         onViewportChange={setViewport}
       >
-        {markers.map((marker, index) => (
-          <Marker
-            key={index}
-            latitude={marker.latitude}
-            longitude={marker.longitude}
-          >
-            <IconButton color="default">
-              <FaceIcon />
-            </IconButton>
-          </Marker>
-        ))}
+        {onlineUsers.map((user, index) => {
+          console.log(user);
+          return (
+            <Marker
+              key={index}
+              latitude={user.location.latitude}
+              longitude={user.location.longitude}
+            >
+              <IconButton
+                color={user.socketId === socket?.id ? "default" : "info"}
+              >
+                <FaceIcon />
+              </IconButton>
+            </Marker>
+          );
+        })}
       </ReactMapGL>
 
       {/* Legend */}
