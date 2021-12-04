@@ -14,6 +14,17 @@ import FaceIcon from "@mui/icons-material/Face";
 import { User } from "../types/user";
 import NamePrompt from "../components/NamePrompt";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
+import {
+  queryFriendsLocations,
+  updateLocation,
+  updateName,
+} from "../service/operations";
+import {
+  EVENT_FRIEND_CONNECTION,
+  EVENT_FRIEND_DISCONNECTION,
+  EVENT_FRIEND_LOCATIONS,
+  EVENT_FRIEND_LOCATION_UPDATE,
+} from "../service/events";
 
 function Dashboard() {
   const location = useGeoLocation();
@@ -45,7 +56,7 @@ function Dashboard() {
   // Update name on server
   useEffect(() => {
     if (name) {
-      socket?.emit("set name", name);
+      updateName(socket, name);
     }
   }, [name]);
 
@@ -59,8 +70,8 @@ function Dashboard() {
       }));
 
       if (isUpdateDue(lastUpdated)) {
-        socket?.emit("location update", location);
-        socket?.emit("query friend locations");
+        updateLocation(socket, location);
+        queryFriendsLocations(socket);
 
         setLastUpdated(Date.now());
       }
@@ -71,17 +82,17 @@ function Dashboard() {
   useEffect(() => {
     // Only allow access to friends' locations when name is set
     if (name) {
-      socket?.on("friend locations", (data) => {
+      socket?.on(EVENT_FRIEND_LOCATIONS, (data) => {
         setOnlineUsers(data);
       });
 
-      socket?.on("friend connection", (name: string) => {
+      socket?.on(EVENT_FRIEND_CONNECTION, (name: string) => {
         enqueueSnackbar(`${name} is online!`, { variant: "success" });
-        socket?.emit("query friend locations");
+        queryFriendsLocations(socket);
       });
 
-      socket?.on("friend disconnection", () => {
-        socket?.emit("query friend locations");
+      socket?.on(EVENT_FRIEND_DISCONNECTION, () => {
+        queryFriendsLocations(socket);
         if (selectedUser && !onlineUsers.includes(selectedUser)) {
           // Selected user has disconnected
           console.log("Selected user disconnected");
@@ -89,17 +100,13 @@ function Dashboard() {
         }
       });
 
-      socket?.on("friend location update", (location) => {
-        console.log("Friend updated location");
-        socket.emit("query friend locations");
+      socket?.on(EVENT_FRIEND_LOCATION_UPDATE, (location) => {
+        queryFriendsLocations(socket);
       });
     }
 
     return () => {
-      socket?.off("friend connection");
-      socket?.off("friend disconnection");
-      socket?.off("friend locations");
-      socket?.off("friend location update");
+      socket?.removeAllListeners();
     };
   }, [socket, name]);
 
