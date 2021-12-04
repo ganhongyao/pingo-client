@@ -67,6 +67,10 @@ function Dashboard() {
       socket?.emit("query friend locations");
     });
 
+    socket?.on("friend disconnection", () => {
+      socket?.emit("query friend locations");
+    });
+
     socket?.on("friend location update", (location) => {
       console.log("Friend updated location");
       socket.emit("query friend locations");
