@@ -11,16 +11,18 @@ import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
 import { Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
-import { ClientSocket } from "../types/clientSocket";
+import { User } from "../types/user";
+import NamePrompt from "../components/NamePrompt";
 
 function Dashboard() {
   const location = useGeoLocation();
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
 
+  const [name, setName] = useState("");
   const [lastUpdated, setLastUpdated] = useState(0);
-  const [onlineUsers, setOnlineUsers] = useState<ClientSocket[]>([]);
-  const [selectedUser, setSelectedUser] = useState<ClientSocket | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -90,6 +92,7 @@ function Dashboard() {
 
   return (
     <>
+      <NamePrompt handleUpdateName={setName} />
       <ReactMapGL
         {...viewport}
         mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}

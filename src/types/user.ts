@@ -1,6 +1,6 @@
 import { GeoLocation } from "./geolocation";
 
-export type ClientSocket = {
+export type User = {
   socketId: string;
   location: GeoLocation;
 };
