@@ -82,6 +82,11 @@ function Dashboard() {
 
       socket?.on("friend disconnection", () => {
         socket?.emit("query friend locations");
+        if (selectedUser && !onlineUsers.includes(selectedUser)) {
+          // Selected user has disconnected
+          console.log("Selected user disconnected");
+          setSelectedUser(null);
+        }
       });
 
       socket?.on("friend location update", (location) => {
