@@ -19,7 +19,7 @@ export default function NamePrompt({ handleUpdateName }: OwnProps) {
 
   const handleSubmit = () => {
     setIsOpen(false);
-    handleUpdateName(name);
+    handleUpdateName(name.trim());
   };
 
   return (

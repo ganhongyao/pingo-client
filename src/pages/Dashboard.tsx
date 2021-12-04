@@ -41,9 +41,16 @@ function Dashboard() {
     return timeElapsed > LOCATION_UPDATE_TIME_INTERVAL;
   };
 
-  // Get the current location of the user
+  // Update name on server
   useEffect(() => {
-    if (location) {
+    if (name) {
+      socket?.emit("set name", name);
+    }
+  }, [name]);
+
+  // Update user location on map and on server
+  useEffect(() => {
+    if (location && name) {
       setViewport((prevViewport) => ({
         ...prevViewport,
         latitude: location.latitude,
@@ -57,34 +64,38 @@ function Dashboard() {
         setLastUpdated(Date.now());
       }
     }
-  }, [socket, location]);
+  }, [socket, location, name]);
 
-  // Listen for friend connections
+  // Listen for friend activity
   useEffect(() => {
-    socket?.on("friend locations", (data) => {
-      setOnlineUsers(data);
-    });
+    // Only allow access to friends' locations when name is set
+    if (name) {
+      socket?.on("friend locations", (data) => {
+        setOnlineUsers(data);
+      });
 
-    socket?.on("friend connection", () => {
-      enqueueSnackbar("Friend is online!", { variant: "success" });
-      socket?.emit("query friend locations");
-    });
+      socket?.on("friend connection", (name: string) => {
+        enqueueSnackbar(`${name} is online!`, { variant: "success" });
+        socket?.emit("query friend locations");
+      });
 
-    socket?.on("friend disconnection", () => {
-      socket?.emit("query friend locations");
-    });
+      socket?.on("friend disconnection", () => {
+        socket?.emit("query friend locations");
+      });
 
-    socket?.on("friend location update", (location) => {
-      console.log("Friend updated location");
-      socket.emit("query friend locations");
-    });
+      socket?.on("friend location update", (location) => {
+        console.log("Friend updated location");
+        socket.emit("query friend locations");
+      });
+    }
 
     return () => {
       socket?.off("friend connection");
+      socket?.off("friend disconnection");
       socket?.off("friend locations");
       socket?.off("friend location update");
     };
-  }, [socket]);
+  }, [socket, name]);
 
   if (!location) {
     return <div>Location not enabled.</div>;
@@ -132,7 +143,9 @@ function Dashboard() {
             }}
           >
             <Typography variant="h6">
-              {selectedUser.socketId === socket?.id ? "You are here" : "Friend"}
+              {selectedUser.socketId === socket?.id
+                ? "You are here"
+                : selectedUser.name}
             </Typography>
           </Popup>
         ) : null}
