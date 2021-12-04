@@ -1,5 +1,5 @@
 import useGeoLocation from "../hooks/useGeoLocation";
-import ReactMapGL, { Marker } from "react-map-gl";
+import ReactMapGL, { Marker, Popup } from "react-map-gl";
 import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import {
@@ -20,6 +20,7 @@ function Dashboard() {
 
   const [lastUpdated, setLastUpdated] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<ClientSocket[]>([]);
+  const [selectedUser, setSelectedUser] = useState<ClientSocket | null>(null);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -87,8 +88,6 @@ function Dashboard() {
     return <div>Location not enabled.</div>;
   }
 
-  console.log(onlineUsers);
-
   return (
     <>
       <ReactMapGL
@@ -97,6 +96,7 @@ function Dashboard() {
         mapStyle={MAPBOX_STYLE}
         onViewportChange={setViewport}
       >
+        {/* Markers */}
         {onlineUsers.map((user, index) => {
           return user.location &&
             user.location.latitude &&
@@ -108,12 +108,31 @@ function Dashboard() {
             >
               <IconButton
                 color={user.socketId === socket?.id ? "default" : "info"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedUser(user);
+                }}
               >
                 <FaceIcon />
               </IconButton>
             </Marker>
           ) : null;
         })}
+
+        {selectedUser ? (
+          <Popup
+            latitude={selectedUser.location.latitude}
+            longitude={selectedUser.location.longitude}
+            offsetLeft={20}
+            onClose={() => {
+              setSelectedUser(null);
+            }}
+          >
+            <Typography variant="h6">
+              {selectedUser.socketId === socket?.id ? "You are here" : "Friend"}
+            </Typography>
+          </Popup>
+        ) : null}
       </ReactMapGL>
 
       {/* Legend */}
