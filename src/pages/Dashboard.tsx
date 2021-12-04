@@ -13,6 +13,7 @@ import { Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 import { User } from "../types/user";
 import NamePrompt from "../components/NamePrompt";
+import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 
 function Dashboard() {
   const location = useGeoLocation();
@@ -112,28 +113,30 @@ function Dashboard() {
       >
         {/* Markers */}
         {onlineUsers.map((user, index) => {
-          return user.location &&
+          return (
+            user.location &&
             user.location.latitude &&
-            user.location.longitude ? (
-            <Marker
-              key={index}
-              latitude={user.location.latitude}
-              longitude={user.location.longitude}
-            >
-              <IconButton
-                color={user.socketId === socket?.id ? "default" : "info"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedUser(user);
-                }}
+            user.location.longitude && (
+              <Marker
+                key={index}
+                latitude={user.location.latitude}
+                longitude={user.location.longitude}
               >
-                <FaceIcon />
-              </IconButton>
-            </Marker>
-          ) : null;
+                <IconButton
+                  color={user.socketId === socket?.id ? "default" : "info"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedUser(user);
+                  }}
+                >
+                  <FaceIcon />
+                </IconButton>
+              </Marker>
+            )
+          );
         })}
 
-        {selectedUser ? (
+        {selectedUser && (
           <Popup
             latitude={selectedUser.location.latitude}
             longitude={selectedUser.location.longitude}
@@ -142,13 +145,20 @@ function Dashboard() {
               setSelectedUser(null);
             }}
           >
-            <Typography variant="h6">
-              {selectedUser.socketId === socket?.id
-                ? "You are here"
-                : selectedUser.name}
-            </Typography>
+            <Grid container direction="column">
+              <Typography variant="h6">
+                {selectedUser.socketId === socket?.id
+                  ? "You are here"
+                  : selectedUser.name}
+              </Typography>
+              {selectedUser.socketId !== socket?.id && (
+                <IconButton size="small">
+                  <EmojiPeopleIcon />
+                </IconButton>
+              )}
+            </Grid>
           </Popup>
-        ) : null}
+        )}
       </ReactMapGL>
 
       {/* Legend */}
