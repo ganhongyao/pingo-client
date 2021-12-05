@@ -39,7 +39,7 @@ export default function PingReceiveDialog({
   const { sender, message } = incomingPing;
 
   return (
-    <Dialog open={isOpen} onClose={handleClose}>
+    <Dialog open={isOpen} onClose={handleClose} fullWidth>
       <DialogTitle>{`Ping from ${sender.name}`}</DialogTitle>
       <DialogContent>
         <TextField
@@ -48,9 +48,10 @@ export default function PingReceiveDialog({
           label="Message"
           type="text"
           fullWidth
+          multiline
           disabled
           variant="standard"
-          value={message}
+          value={message || "(blank)"}
         />
       </DialogContent>
       <DialogActions>

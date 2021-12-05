@@ -56,6 +56,7 @@ export default function PingSendDialog({
           label="Message"
           type="text"
           fullWidth
+          multiline
           variant="standard"
           placeholder="Let's meet!"
           value={message}
