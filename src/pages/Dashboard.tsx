@@ -9,7 +9,7 @@ import {
 } from "../util/constants";
 import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
-import { Grid, IconButton, Typography } from "@mui/material";
+import { Button, Grid, IconButton, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 import { User } from "../types/user";
 import NamePrompt from "../components/NamePrompt";
@@ -25,8 +25,20 @@ import {
   EVENT_FRIEND_LOCATIONS,
   EVENT_FRIEND_LOCATION_UPDATE,
 } from "../service/events";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles((theme) => ({
+  otherUser: {
+    color: "#0288d1",
+  },
+
+  self: {
+    color: "grey",
+  },
+}));
 
 function Dashboard() {
+  const classes = useStyles();
   const location = useGeoLocation();
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
@@ -83,7 +95,13 @@ function Dashboard() {
     // Only allow access to friends' locations when name is set
     if (name) {
       socket?.on(EVENT_FRIEND_LOCATIONS, (data) => {
-        setOnlineUsers(data);
+        // Moves self to front so that legend displays self first before other users
+        const self = data.filter((user: User) => user.socketId === socket.id);
+        const otherUsers = data.filter(
+          (user: User) => user.socketId !== socket.id
+        );
+        const allUsers = [...self, ...otherUsers];
+        setOnlineUsers(allUsers);
       });
 
       socket?.on(EVENT_FRIEND_CONNECTION, (name: string) => {
@@ -114,6 +132,10 @@ function Dashboard() {
     return <div>Location not enabled.</div>;
   }
 
+  const handleSelectUser = (user: User) => {
+    setSelectedUser(user);
+  };
+
   return (
     <>
       <NamePrompt handleUpdateName={setName} />
@@ -136,12 +158,14 @@ function Dashboard() {
               >
                 <IconButton
                   color={user.socketId === socket?.id ? "default" : "info"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setSelectedUser(user);
+                  onClick={() => {
+                    handleSelectUser(user);
                   }}
                 >
                   <FaceIcon />
+                  <Typography>
+                    {user.socketId === socket?.id ? "You" : user.name}
+                  </Typography>
                 </IconButton>
               </Marker>
             )
@@ -157,36 +181,65 @@ function Dashboard() {
               setSelectedUser(null);
             }}
           >
-            <Grid container direction="column">
-              <Typography variant="h6">
-                {selectedUser.socketId === socket?.id
-                  ? "You are here"
-                  : selectedUser.name}
-              </Typography>
-              {selectedUser.socketId !== socket?.id && (
-                <IconButton size="small">
-                  <EmojiPeopleIcon />
-                </IconButton>
-              )}
+            <Grid container direction="column" alignItems="center">
+              <Grid item>
+                <Typography variant="h6">
+                  {selectedUser.socketId === socket?.id
+                    ? "You"
+                    : selectedUser.name}
+                </Typography>
+              </Grid>
+              <Grid item>
+                {selectedUser.socketId !== socket?.id && (
+                  <IconButton size="small">
+                    <EmojiPeopleIcon />
+                  </IconButton>
+                )}
+              </Grid>
             </Grid>
           </Popup>
         )}
       </ReactMapGL>
 
       {/* Legend */}
+      <Typography variant="h6">Online Users: </Typography>
       <Grid container direction="row" spacing={1}>
-        <Grid item>
-          <FaceIcon color="action" />
-        </Grid>
-        <Grid item>
-          <Typography>You</Typography>
-        </Grid>
-        <Grid item>
-          <FaceIcon color="info" />
-        </Grid>
-        <Grid item>
-          <Typography>Friend</Typography>
-        </Grid>
+        {onlineUsers.map((user, index) => (
+          <Grid
+            container
+            item
+            direction="row"
+            alignContent="center"
+            xs={3}
+            md={2}
+          >
+            <Button
+              onClick={() => {
+                handleSelectUser(user);
+              }}
+            >
+              <Grid item>
+                <FaceIcon
+                  className={
+                    user.socketId === socket?.id
+                      ? classes.self
+                      : classes.otherUser
+                  }
+                />
+              </Grid>
+              <Grid
+                item
+                className={
+                  user.socketId === socket?.id
+                    ? classes.self
+                    : classes.otherUser
+                }
+              >
+                {user.socketId === socket?.id ? "You" : user.name}
+              </Grid>
+            </Button>
+          </Grid>
+        ))}
       </Grid>
     </>
   );
