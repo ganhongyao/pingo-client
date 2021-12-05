@@ -253,6 +253,7 @@ function Dashboard() {
       <Grid container direction="row" spacing={1}>
         {onlineUsers.map((user, index) => (
           <Grid
+            key={index}
             container
             item
             direction="row"

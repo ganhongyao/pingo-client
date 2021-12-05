@@ -7,7 +7,7 @@ import {
   TextField,
 } from "@mui/material";
 import { Nullable } from "../types/nullable";
-import { PingIncoming, User } from "../types/user";
+import { PingIncoming } from "../types/user";
 
 interface OwnProps {
   isOpen: boolean;

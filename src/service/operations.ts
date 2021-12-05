@@ -1,7 +1,7 @@
 import { Socket } from "socket.io-client";
 import { GeoLocation } from "../types/geolocation";
 import { Nullable } from "../types/nullable";
-import { PingOutgoing, User } from "../types/user";
+import { PingOutgoing } from "../types/user";
 import {
   EVENT_PING_FRIEND,
   EVENT_QUERY_FRIEND_LOCATIONS,
