@@ -1,7 +1,7 @@
 import { Socket } from "socket.io-client";
 import { GeoLocation } from "../types/geolocation";
 import { Nullable } from "../types/nullable";
-import { User } from "../types/user";
+import { PingOutgoing, User } from "../types/user";
 import {
   EVENT_PING_FRIEND,
   EVENT_QUERY_FRIEND_LOCATIONS,
@@ -33,9 +33,12 @@ export function queryFriendsLocations(socket: Nullable<Socket>): void {
   socket.emit(EVENT_QUERY_FRIEND_LOCATIONS);
 }
 
-export function pingFriend(socket: Nullable<Socket>, user: User): void {
+export function pingFriend(
+  socket: Nullable<Socket>,
+  pingAction: PingOutgoing
+): void {
   if (!socket) {
     throw new Error("Socket is not initialized");
   }
-  socket.emit(EVENT_PING_FRIEND, user);
+  socket.emit(EVENT_PING_FRIEND, pingAction);
 }

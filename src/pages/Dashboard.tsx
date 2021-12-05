@@ -11,7 +11,7 @@ import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
 import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
-import { User } from "../types/user";
+import { PingIncoming, User } from "../types/user";
 import NamePrompt from "../components/NamePrompt";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import {
@@ -43,7 +43,7 @@ function Dashboard() {
   const classes = useStyles();
   const location = useGeoLocation();
   const socket = useSocket();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [name, setName] = useState("");
   const [lastUpdated, setLastUpdated] = useState(0);
@@ -107,15 +107,22 @@ function Dashboard() {
         setOnlineUsers(allUsers);
       });
 
-      socket?.on(EVENT_PING, (user: User) => {
-        setPingedBy([...pingedBy, user]);
-        enqueueSnackbar(`${user.name} pinged you`, {
+      socket?.on(EVENT_PING, (incomingPing: PingIncoming) => {
+        const { sender, message } = incomingPing;
+        setPingedBy([...pingedBy, sender]);
+        enqueueSnackbar(`${sender.name} pinged you`, {
           variant: "info",
+          action: (key) => (
+            <Button className={classes.otherUser}>Respond</Button>
+          ),
         });
       });
 
       socket?.on(EVENT_FRIEND_CONNECTION, (name: string) => {
-        enqueueSnackbar(`${name} is online!`, { variant: "success" });
+        const snackbarKey = enqueueSnackbar(`${name} is online!`, {
+          variant: "success",
+          onClick: () => closeSnackbar(snackbarKey),
+        });
         queryFriendsLocations(socket);
       });
 
@@ -202,7 +209,12 @@ function Dashboard() {
                   <Tooltip title={`Ping ${selectedUser.name}`}>
                     <IconButton
                       size="small"
-                      onClick={() => pingFriend(socket, selectedUser)}
+                      onClick={() =>
+                        pingFriend(socket, {
+                          receiver: selectedUser,
+                          message: "This is a ping",
+                        })
+                      }
                     >
                       <EmojiPeopleIcon />
                     </IconButton>
