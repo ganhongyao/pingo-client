@@ -55,11 +55,11 @@ export default function PingReceiveDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleDecline} color="warning" variant="contained">
-          Decline
+        <Button onClick={handleDecline} color="error">
+          Ignore
         </Button>
-        <Button onClick={handleAccept} color="success" variant="contained">
-          Accept
+        <Button onClick={handleAccept} color="info" variant="contained">
+          Chat
         </Button>
       </DialogActions>
     </Dialog>
