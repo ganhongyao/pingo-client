@@ -15,7 +15,6 @@ import { PingIncoming, User } from "../types/user";
 import NamePrompt from "../components/NamePrompt";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import {
-  pingFriend,
   queryFriendsLocations,
   updateLocation,
   updateName,
@@ -28,6 +27,7 @@ import {
   EVENT_PING,
 } from "../service/events";
 import { makeStyles } from "@mui/styles";
+import PingSendDialog from "../components/PingSendDialog";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -50,6 +50,7 @@ function Dashboard() {
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [pingedBy, setPingedBy] = useState<User[]>([]);
+  const [pingDialogIsOpen, setPingDialogIsOpen] = useState(false);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -156,6 +157,12 @@ function Dashboard() {
   return (
     <>
       <NamePrompt handleUpdateName={setName} />
+      <PingSendDialog
+        isOpen={pingDialogIsOpen}
+        setIsOpen={setPingDialogIsOpen}
+        socket={socket}
+        receiver={selectedUser}
+      />
       <ReactMapGL
         {...viewport}
         mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
@@ -209,12 +216,7 @@ function Dashboard() {
                   <Tooltip title={`Ping ${selectedUser.name}`}>
                     <IconButton
                       size="small"
-                      onClick={() =>
-                        pingFriend(socket, {
-                          receiver: selectedUser,
-                          message: "This is a ping",
-                        })
-                      }
+                      onClick={() => setPingDialogIsOpen(true)}
                     >
                       <EmojiPeopleIcon />
                     </IconButton>
