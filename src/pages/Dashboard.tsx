@@ -28,6 +28,8 @@ import {
 } from "../service/events";
 import { makeStyles } from "@mui/styles";
 import PingSendDialog from "../components/PingSendDialog";
+import PingReceiveDialog from "../components/PingReceiveDialog";
+import { Nullable } from "../types/nullable";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -48,9 +50,10 @@ function Dashboard() {
   const [name, setName] = useState("");
   const [lastUpdated, setLastUpdated] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [pingedBy, setPingedBy] = useState<User[]>([]);
-  const [pingDialogIsOpen, setPingDialogIsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Nullable<User>>(null);
+  const [openPing, setOpenPing] = useState<Nullable<PingIncoming>>(null);
+  const [pingSendDialogIsOpen, setPingSendDialogIsOpen] = useState(false);
+  const [pingReceiveDialogIsOpen, setPingReceiveDialogIsOpen] = useState(false);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -67,6 +70,11 @@ function Dashboard() {
     const now = Date.now();
     const timeElapsed = now - lastUpdated;
     return timeElapsed > LOCATION_UPDATE_TIME_INTERVAL;
+  };
+
+  const handleOpenPing = (ping: PingIncoming) => {
+    setOpenPing(ping);
+    setPingReceiveDialogIsOpen(true);
   };
 
   // Update name on server
@@ -109,12 +117,16 @@ function Dashboard() {
       });
 
       socket?.on(EVENT_PING, (incomingPing: PingIncoming) => {
-        const { sender, message } = incomingPing;
-        setPingedBy([...pingedBy, sender]);
+        const { sender } = incomingPing;
         enqueueSnackbar(`${sender.name} pinged you`, {
           variant: "info",
           action: (key) => (
-            <Button className={classes.otherUser}>Respond</Button>
+            <Button
+              className={classes.otherUser}
+              onClick={() => handleOpenPing(incomingPing)}
+            >
+              Respond
+            </Button>
           ),
         });
       });
@@ -156,13 +168,20 @@ function Dashboard() {
 
   return (
     <>
+      {/* Dialogs */}
       <NamePrompt handleUpdateName={setName} />
       <PingSendDialog
-        isOpen={pingDialogIsOpen}
-        setIsOpen={setPingDialogIsOpen}
+        isOpen={pingSendDialogIsOpen}
+        setIsOpen={setPingSendDialogIsOpen}
         socket={socket}
         receiver={selectedUser}
       />
+      <PingReceiveDialog
+        isOpen={pingReceiveDialogIsOpen}
+        setIsOpen={setPingReceiveDialogIsOpen}
+        incomingPing={openPing}
+      />
+
       <ReactMapGL
         {...viewport}
         mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
@@ -196,6 +215,7 @@ function Dashboard() {
           );
         })}
 
+        {/* Popup for selected user */}
         {selectedUser && (
           <Popup
             latitude={selectedUser.location.latitude}
@@ -216,7 +236,7 @@ function Dashboard() {
                   <Tooltip title={`Ping ${selectedUser.name}`}>
                     <IconButton
                       size="small"
-                      onClick={() => setPingDialogIsOpen(true)}
+                      onClick={() => setPingSendDialogIsOpen(true)}
                     >
                       <EmojiPeopleIcon />
                     </IconButton>
