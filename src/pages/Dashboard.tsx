@@ -9,12 +9,13 @@ import {
 } from "../util/constants";
 import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
-import { Button, Grid, IconButton, Typography } from "@mui/material";
+import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 import { User } from "../types/user";
 import NamePrompt from "../components/NamePrompt";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import {
+  pingFriend,
   queryFriendsLocations,
   updateLocation,
   updateName,
@@ -24,6 +25,7 @@ import {
   EVENT_FRIEND_DISCONNECTION,
   EVENT_FRIEND_LOCATIONS,
   EVENT_FRIEND_LOCATION_UPDATE,
+  EVENT_PING,
 } from "../service/events";
 import { makeStyles } from "@mui/styles";
 
@@ -47,6 +49,7 @@ function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [pingedBy, setPingedBy] = useState<User[]>([]);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -102,6 +105,13 @@ function Dashboard() {
         );
         const allUsers = [...self, ...otherUsers];
         setOnlineUsers(allUsers);
+      });
+
+      socket?.on(EVENT_PING, (user: User) => {
+        setPingedBy([...pingedBy, user]);
+        enqueueSnackbar(`${user.name} pinged you`, {
+          variant: "info",
+        });
       });
 
       socket?.on(EVENT_FRIEND_CONNECTION, (name: string) => {
@@ -177,9 +187,7 @@ function Dashboard() {
             latitude={selectedUser.location.latitude}
             longitude={selectedUser.location.longitude}
             offsetLeft={20}
-            onClose={() => {
-              setSelectedUser(null);
-            }}
+            onClose={() => setSelectedUser(null)}
           >
             <Grid container direction="column" alignItems="center">
               <Grid item>
@@ -191,9 +199,14 @@ function Dashboard() {
               </Grid>
               <Grid item>
                 {selectedUser.socketId !== socket?.id && (
-                  <IconButton size="small">
-                    <EmojiPeopleIcon />
-                  </IconButton>
+                  <Tooltip title={`Ping ${selectedUser.name}`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => pingFriend(socket, selectedUser)}
+                    >
+                      <EmojiPeopleIcon />
+                    </IconButton>
+                  </Tooltip>
                 )}
               </Grid>
             </Grid>
@@ -213,11 +226,7 @@ function Dashboard() {
             xs={3}
             md={2}
           >
-            <Button
-              onClick={() => {
-                handleSelectUser(user);
-              }}
-            >
+            <Button onClick={() => handleSelectUser(user)}>
               <Grid item>
                 <FaceIcon
                   className={
