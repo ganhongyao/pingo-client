@@ -20,13 +20,15 @@ interface OwnProps {
   receiver: Nullable<User>;
 }
 
+const DEFAULT_INVITATION_MESSAGE = "Let's meet!";
+
 export default function PingSendDialog({
   isOpen,
   setIsOpen,
   socket,
   receiver,
 }: OwnProps) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(DEFAULT_INVITATION_MESSAGE);
 
   if (!receiver) {
     return null;
@@ -39,7 +41,7 @@ export default function PingSendDialog({
   const handleSubmit = () => {
     pingFriend(socket, { receiver: receiver, message: message });
     handleClose();
-    setMessage("");
+    setMessage(DEFAULT_INVITATION_MESSAGE);
   };
 
   return (
@@ -58,7 +60,6 @@ export default function PingSendDialog({
           fullWidth
           multiline
           variant="standard"
-          placeholder="Let's meet!"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={(e) => {
