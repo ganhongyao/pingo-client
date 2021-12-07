@@ -42,6 +42,7 @@ export default function AppShell({ children }: OwnProps) {
         <Toolbar />
         <Routes>
           <Route element={<Dashboard />} path="dashboard" />
+          <Route element={<Chats />} path="chats/" />
           <Route element={<Chats />} path="chats/:chatId" />
         </Routes>
       </Box>

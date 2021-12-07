@@ -16,10 +16,12 @@ import ChatMessage from "../components/ChatMessage";
 import { makeStyles } from "@mui/styles";
 import { useSelector } from "react-redux";
 import { SocketContext } from "../context/socket";
-import { getAllConversations } from "../modules/conversations";
-import { Conversation } from "../types/conversation";
-import { Nullable } from "../types/nullable";
-import { useParams } from "react-router";
+import {
+  getAllConversations,
+  getConversationByIndex,
+} from "../modules/conversations";
+import { useNavigate, useParams } from "react-router";
+import { sendMessage } from "../service/operations";
 
 const useStyles = makeStyles((theme) => ({
   name: {
@@ -28,21 +30,35 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Chats() {
-  const conversations = useSelector(getAllConversations);
   const classes = useStyles();
+  const navigate = useNavigate();
+
+  const conversations = useSelector(getAllConversations);
   const { chatId } = useParams();
+  const currentConversation = useSelector(
+    getConversationByIndex(Number(chatId))
+  );
   const socket = useContext(SocketContext);
-  const [currentConversation, setCurrentConversation] =
-    useState<Nullable<Conversation>>(null);
   const [draftMessage, setDraftMessage] = useState("");
 
-  const handleSelectConversation = (conversation: Conversation) => {
-    setCurrentConversation(conversation);
+  const handleSendMessage = () => {
+    if (draftMessage) {
+      sendMessage(socket, {
+        sender: currentConversation!.otherUser, // TODO: get current user
+        receiver: currentConversation!.otherUser,
+        content: draftMessage.trim(),
+      });
+      setDraftMessage("");
+    }
+  };
+
+  const handleSelectConversation = (index: number) => {
+    navigate(`/chats/${index}`);
   };
 
   useEffect(() => {
-    if (chatId && conversations.length > 0) {
-      handleSelectConversation(conversations[conversations.length - 1]);
+    if (chatId === "latest" && conversations.length > 0) {
+      handleSelectConversation(conversations.length - 1);
     }
   }, [chatId]);
 
@@ -52,9 +68,7 @@ export default function Chats() {
         <List style={{ width: "20%" }}>
           {conversations.map((conversation, index) => (
             <ListItem disablePadding key={index}>
-              <ListItemButton
-                onClick={() => handleSelectConversation(conversation)}
-              >
+              <ListItemButton onClick={() => handleSelectConversation(index)}>
                 <ListItemIcon>
                   <InboxIcon />
                 </ListItemIcon>
@@ -69,7 +83,7 @@ export default function Chats() {
             {currentConversation?.otherUser.name || "No chats selected"}
           </Typography>
           {currentConversation?.messages.map((message, index) => (
-            <ChatMessage message={message.content} sender={message.sender} />
+            <ChatMessage key={index} message={message} />
           ))}
           {currentConversation && (
             <TextField
@@ -83,7 +97,7 @@ export default function Chats() {
               onChange={(e) => setDraftMessage(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
-                  // handleSubmit();
+                  handleSendMessage();
                 }
               }}
             />

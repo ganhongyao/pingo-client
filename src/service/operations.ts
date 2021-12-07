@@ -1,12 +1,15 @@
 import { Socket } from "socket.io-client";
+import { addSentMessage } from "../modules/conversations";
 import { setName } from "../modules/user";
 import { store } from "../store";
 import { GeoLocation } from "../types/geolocation";
+import { Message } from "../types/message";
 import { Nullable } from "../types/nullable";
 import { PingOutgoing } from "../types/user";
 import {
   EVENT_PING_FRIEND,
   EVENT_QUERY_FRIEND_LOCATIONS,
+  EVENT_SEND_MESSAGE,
   EVENT_UPDATE_LOCATION,
   EVENT_UPDATE_NAME,
 } from "./events";
@@ -44,4 +47,12 @@ export function pingFriend(
     throw new Error("Socket is not initialized");
   }
   socket.emit(EVENT_PING_FRIEND, pingAction);
+}
+
+export function sendMessage(socket: Nullable<Socket>, message: Message): void {
+  if (!socket) {
+    throw new Error("Socket is not initialized");
+  }
+  store.dispatch(addSentMessage(message));
+  socket.emit(EVENT_SEND_MESSAGE, message);
 }

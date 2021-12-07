@@ -2,7 +2,6 @@ import { Message } from "./message";
 import { User } from "./user";
 
 export type Conversation = {
-  sender: User;
-  receiver: User;
+  otherUser: User;
   messages: Message[];
 };
