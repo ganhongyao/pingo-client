@@ -1,6 +1,6 @@
 import { Socket } from "socket.io-client";
 import { setName } from "../modules/user";
-import store from "../store";
+import { store } from "../store";
 import { GeoLocation } from "../types/geolocation";
 import { Nullable } from "../types/nullable";
 import { PingOutgoing } from "../types/user";

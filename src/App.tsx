@@ -8,8 +8,8 @@ import AppShell from "./components/AppShell";
 import { socket, SocketContext } from "./context/socket";
 import NamePrompt from "./components/NamePrompt";
 import Landing from "./pages/Landing";
-import store from "./store";
 import theme from "./theme";
+import { store } from "./store";
 
 function App() {
   const [name, setName] = useState("");

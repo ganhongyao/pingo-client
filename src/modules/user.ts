@@ -1,18 +1,26 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppState } from "../store";
+
+interface UserState {
+  name: string;
+}
+
+const initialState: UserState = {
+  name: "",
+};
 
 export const userSlice = createSlice({
   name: "user",
-  initialState: {
-    name: "",
-  },
+  initialState,
   reducers: {
-    setName: (state, action) => {
+    setName: (state, action: PayloadAction<string>) => {
       state.name = action.payload;
     },
   },
 });
 
-// Action creators are generated for each case reducer function
 export const { setName } = userSlice.actions;
 
 export default userSlice.reducer;
+
+export const getUserName = (state: AppState) => state.user.name;

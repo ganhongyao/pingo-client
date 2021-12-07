@@ -1,5 +1,4 @@
 import { makeStyles } from "@mui/styles";
-import { useSocket } from "../hooks/useSocket";
 import { User } from "../types/user";
 
 const useStyles = makeStyles((theme) => ({

@@ -11,12 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { User } from "../types/user";
 import ChatMessage from "../components/ChatMessage";
-import { useSocket } from "../hooks/useSocket";
 import { makeStyles } from "@mui/styles";
 import { useSelector } from "react-redux";
+import { SocketContext } from "../context/socket";
+import { getUserName } from "../modules/user";
 
 const useStyles = makeStyles((theme) => ({
   name: {
@@ -25,9 +26,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Chats() {
-  const myName = useSelector((state: any) => state.user.name);
+  const userName = useSelector(getUserName);
   const classes = useStyles();
-  const socket = useSocket();
+  const socket = useContext(SocketContext);
   const [users, setUsers] = useState<User[]>([
     {
       name: "Billie Jean",
@@ -66,7 +67,7 @@ export default function Chats() {
         <Divider orientation="vertical" />
         <Paper variant="outlined" style={{ width: "80%", padding: "20px" }}>
           <Typography variant="h4" className={classes.name}>
-            I AM {socket?.id}
+            I AM {userName}
           </Typography>
           {messages.map((message, index) => (
             <ChatMessage message={message} user={currentUser} />
