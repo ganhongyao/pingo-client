@@ -1,4 +1,6 @@
 import { Socket } from "socket.io-client";
+import { setName } from "../modules/user";
+import store from "../store";
 import { GeoLocation } from "../types/geolocation";
 import { Nullable } from "../types/nullable";
 import { PingOutgoing } from "../types/user";
@@ -13,6 +15,7 @@ export function updateName(socket: Nullable<Socket>, name: string): void {
   if (!socket) {
     throw new Error("Socket is not initialized");
   }
+  store.dispatch(setName(name));
   socket.emit(EVENT_UPDATE_NAME, name);
 }
 

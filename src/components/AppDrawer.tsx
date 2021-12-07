@@ -21,6 +21,7 @@ type DrawerListItem = {
 
 const drawerListMainItems: DrawerListItem[] = [
   { text: "Dashboard", link: "/dashboard", icon: <InboxIcon /> },
+  { text: "Chats", link: "/chats", icon: <InboxIcon /> },
   { text: "Friends", link: "/friends", icon: <InboxIcon /> },
   { text: "Past Hangouts", link: "/historyg", icon: <InboxIcon /> },
 ];

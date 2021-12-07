@@ -7,19 +7,20 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { updateName } from "../service/operations";
+import { useDispatch } from "react-redux";
+import { SocketContext } from "../context/socket";
 
-interface OwnProps {
-  handleUpdateName: (name: string) => void;
-}
-
-export default function NamePrompt({ handleUpdateName }: OwnProps) {
+export default function NamePrompt() {
+  const dispatch = useDispatch();
+  const socket = useContext(SocketContext);
   const [isOpen, setIsOpen] = useState(true);
-  const [name, setName] = useState("");
+  const [draftName, setDraftName] = useState("");
 
   const handleSubmit = () => {
     setIsOpen(false);
-    handleUpdateName(name.trim());
+    updateName(socket, draftName.trim());
   };
 
   return (
@@ -37,8 +38,8 @@ export default function NamePrompt({ handleUpdateName }: OwnProps) {
           type="text"
           fullWidth
           variant="standard"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={draftName}
+          onChange={(e) => setDraftName(e.target.value)}
           onKeyPress={(e) => {
             if (e.key === "Enter") {
               handleSubmit();

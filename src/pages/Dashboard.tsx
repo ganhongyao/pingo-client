@@ -30,6 +30,7 @@ import PingSendDialog from "../components/PingSendDialog";
 import PingReceiveDialog from "../components/PingReceiveDialog";
 import { Nullable } from "../types/nullable";
 import { SocketContext } from "../context/socket";
+import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -47,7 +48,7 @@ function Dashboard() {
   const socket = useContext(SocketContext);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const [name, setName] = useState("");
+  const name = useSelector((state: any) => state.user.name);
   const [lastUpdated, setLastUpdated] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<Nullable<User>>(null);
@@ -76,13 +77,6 @@ function Dashboard() {
     setOpenPing(ping);
     setPingReceiveDialogIsOpen(true);
   };
-
-  // Update name on server
-  useEffect(() => {
-    if (name) {
-      updateName(socket, name);
-    }
-  }, [name]);
 
   // Update user location on map and on server
   useEffect(() => {
@@ -169,7 +163,6 @@ function Dashboard() {
   return (
     <>
       {/* Dialogs */}
-      <NamePrompt handleUpdateName={setName} />
       <PingSendDialog
         isOpen={pingSendDialogIsOpen}
         setIsOpen={setPingSendDialogIsOpen}

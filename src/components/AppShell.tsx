@@ -3,6 +3,7 @@ import { makeStyles } from "@mui/styles";
 import { Box } from "@mui/system";
 import { ReactNode } from "react";
 import { Routes, Route } from "react-router";
+import Chats from "../pages/Chats";
 import Dashboard from "../pages/Dashboard";
 import AppDrawer from "./AppDrawer";
 
@@ -41,6 +42,7 @@ export default function AppShell({ children }: OwnProps) {
         <Toolbar />
         <Routes>
           <Route element={<Dashboard />} path="dashboard" />
+          <Route element={<Chats />} path="chats" />
         </Routes>
       </Box>
     </Box>
