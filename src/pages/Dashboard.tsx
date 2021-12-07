@@ -1,13 +1,12 @@
 import useGeoLocation from "../hooks/useGeoLocation";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import {
   DEFAULT_MAP_CENTER,
   LOCATION_UPDATE_TIME_INTERVAL,
   MAPBOX_STYLE,
 } from "../util/constants";
-import { useSocket } from "../hooks/useSocket";
 import { useSnackbar } from "notistack";
 import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
@@ -30,6 +29,7 @@ import { makeStyles } from "@mui/styles";
 import PingSendDialog from "../components/PingSendDialog";
 import PingReceiveDialog from "../components/PingReceiveDialog";
 import { Nullable } from "../types/nullable";
+import { SocketContext } from "../context/socket";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 function Dashboard() {
   const classes = useStyles();
   const location = useGeoLocation();
-  const socket = useSocket();
+  const socket = useContext(SocketContext);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [name, setName] = useState("");
