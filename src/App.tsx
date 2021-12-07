@@ -1,23 +1,18 @@
 import { ThemeProvider } from "@emotion/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { SnackbarProvider } from "notistack";
-import { useState } from "react";
 import { Provider } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AppShell from "./components/AppShell";
-import { socket, SocketContext } from "./context/socket";
 import NamePrompt from "./components/NamePrompt";
 import Landing from "./pages/Landing";
 import theme from "./theme";
 import { store } from "./store";
 
 function App() {
-  const [name, setName] = useState("");
-
   return (
     <Provider store={store}>
-    <ThemeProvider theme={theme}>
-      <SocketContext.Provider value={socket}>
+      <ThemeProvider theme={theme}>
         <NamePrompt />
         <SnackbarProvider>
           <Routes>
@@ -32,8 +27,7 @@ function App() {
             />
           </Routes>
         </SnackbarProvider>
-      </SocketContext.Provider>
-    </ThemeProvider>
+      </ThemeProvider>
     </Provider>
   );
 }

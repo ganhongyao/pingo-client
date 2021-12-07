@@ -1,6 +1,6 @@
 import useGeoLocation from "../hooks/useGeoLocation";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import {
   DEFAULT_MAP_CENTER,
@@ -11,13 +11,8 @@ import { useSnackbar } from "notistack";
 import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 import { PingIncoming, User } from "../types/user";
-import NamePrompt from "../components/NamePrompt";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
-import {
-  queryFriendsLocations,
-  updateLocation,
-  updateName,
-} from "../service/operations";
+import { queryFriendsLocations, updateLocation } from "../service/operations";
 import {
   EVENT_FRIEND_CONNECTION,
   EVENT_FRIEND_DISCONNECTION,
@@ -29,8 +24,8 @@ import { makeStyles } from "@mui/styles";
 import PingSendDialog from "../components/PingSendDialog";
 import PingReceiveDialog from "../components/PingReceiveDialog";
 import { Nullable } from "../types/nullable";
-import { SocketContext } from "../context/socket";
 import { useSelector } from "react-redux";
+import { getCurrentUser } from "../modules/user";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -45,10 +40,9 @@ const useStyles = makeStyles((theme) => ({
 function Dashboard() {
   const classes = useStyles();
   const location = useGeoLocation();
-  const socket = useContext(SocketContext);
+  const { name, socket } = useSelector(getCurrentUser);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const name = useSelector((state: any) => state.user.name);
   const [lastUpdated, setLastUpdated] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<Nullable<User>>(null);

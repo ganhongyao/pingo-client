@@ -7,14 +7,13 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { updateName } from "../service/operations";
-import { useDispatch } from "react-redux";
-import { SocketContext } from "../context/socket";
+import { useSelector } from "react-redux";
+import { getCurrentUser } from "../modules/user";
 
 export default function NamePrompt() {
-  const dispatch = useDispatch();
-  const socket = useContext(SocketContext);
+  const { socket } = useSelector(getCurrentUser);
   const [isOpen, setIsOpen] = useState(true);
   const [draftName, setDraftName] = useState("");
 
