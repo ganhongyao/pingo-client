@@ -12,12 +12,13 @@ import {
 } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
 import { useContext, useState } from "react";
-import { User } from "../types/user";
 import ChatMessage from "../components/ChatMessage";
 import { makeStyles } from "@mui/styles";
 import { useSelector } from "react-redux";
 import { SocketContext } from "../context/socket";
-import { getUserName } from "../modules/user";
+import { getAllConversations } from "../modules/conversations";
+import { Conversation } from "../types/conversation";
+import { Nullable } from "../types/nullable";
 
 const useStyles = makeStyles((theme) => ({
   name: {
@@ -26,40 +27,30 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Chats() {
-  const userName = useSelector(getUserName);
+  const conversations = useSelector(getAllConversations);
   const classes = useStyles();
   const socket = useContext(SocketContext);
-  const [users, setUsers] = useState<User[]>([
-    {
-      name: "Billie Jean",
-      socketId: "",
-      location: { latitude: 0, longitude: 0 },
-    },
-    {
-      name: "John Doe",
-      socketId: "",
-      location: { latitude: 0, longitude: 0 },
-    },
-  ]);
-  const currentUser = users[0];
-  const [messages, setMessages] = useState<string[]>([
-    "hello",
-    "this is you",
-    "this is me",
-  ]);
+  const [currentConversation, setCurrentConversation] =
+    useState<Nullable<Conversation>>(null);
   const [draftMessage, setDraftMessage] = useState("");
+
+  const handleSelectConversation = (conversation: Conversation) => {
+    setCurrentConversation(conversation);
+  };
 
   return (
     <>
       <Box sx={{ display: "flex" }}>
         <List style={{ width: "20%" }}>
-          {users.map((user, index) => (
+          {conversations.map((conversation, index) => (
             <ListItem disablePadding key={index}>
-              <ListItemButton>
+              <ListItemButton
+                onClick={() => handleSelectConversation(conversation)}
+              >
                 <ListItemIcon>
                   <InboxIcon />
                 </ListItemIcon>
-                <ListItemText primary={user.name} />
+                <ListItemText primary={conversation.otherUser.name} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -67,26 +58,28 @@ export default function Chats() {
         <Divider orientation="vertical" />
         <Paper variant="outlined" style={{ width: "80%", padding: "20px" }}>
           <Typography variant="h4" className={classes.name}>
-            I AM {userName}
+            {currentConversation?.otherUser.name || "No chats selected"}
           </Typography>
-          {messages.map((message, index) => (
-            <ChatMessage message={message} user={currentUser} />
+          {currentConversation?.messages.map((message, index) => (
+            <ChatMessage message={message.content} sender={message.sender} />
           ))}
-          <TextField
-            autoFocus
-            margin="dense"
-            id="message"
-            label="Message"
-            type="text"
-            fullWidth
-            value={draftMessage}
-            onChange={(e) => setDraftMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                // handleSubmit();
-              }
-            }}
-          />
+          {currentConversation && (
+            <TextField
+              autoFocus
+              margin="dense"
+              id="message"
+              label="Message"
+              type="text"
+              fullWidth
+              value={draftMessage}
+              onChange={(e) => setDraftMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  // handleSubmit();
+                }
+              }}
+            />
+          )}
         </Paper>
       </Box>
     </>

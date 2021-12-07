@@ -1,7 +1,19 @@
+import { Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { socket } from "../context/socket";
 import { User } from "../types/user";
 
 const useStyles = makeStyles((theme) => ({
+  sentMessageContainer: {
+    display: "flex",
+    flexDirection: "row-reverse",
+    alignSelf: "flex-end",
+  },
+
+  receivedMessageContainer: {
+    display: "flex",
+  },
+
   message: {
     display: "flex",
     alignItems: "center",
@@ -15,11 +27,15 @@ const useStyles = makeStyles((theme) => ({
 
 interface OwnProps {
   message: string;
-  user: User;
+  sender: User;
 }
 
-export default function ChatMessage({ message, user }: OwnProps) {
+export default function ChatMessage({ message, sender }: OwnProps) {
   const classes = useStyles();
 
-  return <div className={classes.message}>{message}</div>;
+  return (
+    <div className={classes.receivedMessageContainer}>
+      <Typography className={classes.message}>{message}</Typography>
+    </div>
+  );
 }
