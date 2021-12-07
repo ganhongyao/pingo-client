@@ -6,6 +6,9 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { createConversation } from "../modules/conversations";
 import { Nullable } from "../types/nullable";
 import { PingIncoming } from "../types/user";
 
@@ -20,6 +23,8 @@ export default function PingReceiveDialog({
   setIsOpen,
   incomingPing,
 }: OwnProps) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const handleClose = () => {
     setIsOpen(false);
   };
@@ -29,7 +34,20 @@ export default function PingReceiveDialog({
   };
 
   const handleAccept = () => {
+    dispatch(
+      createConversation({
+        otherUser: incomingPing!.sender,
+        messages: [
+          {
+            sender: incomingPing!.sender,
+            receiver: incomingPing!.sender, // TODO: Set to current user
+            content: incomingPing!.message,
+          },
+        ],
+      })
+    );
     handleClose();
+    navigate("/chats/latest");
   };
 
   if (!incomingPing) {

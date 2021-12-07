@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChatMessage from "../components/ChatMessage";
 import { makeStyles } from "@mui/styles";
 import { useSelector } from "react-redux";
@@ -19,6 +19,7 @@ import { SocketContext } from "../context/socket";
 import { getAllConversations } from "../modules/conversations";
 import { Conversation } from "../types/conversation";
 import { Nullable } from "../types/nullable";
+import { useParams } from "react-router";
 
 const useStyles = makeStyles((theme) => ({
   name: {
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Chats() {
   const conversations = useSelector(getAllConversations);
   const classes = useStyles();
+  const { chatId } = useParams();
   const socket = useContext(SocketContext);
   const [currentConversation, setCurrentConversation] =
     useState<Nullable<Conversation>>(null);
@@ -37,6 +39,12 @@ export default function Chats() {
   const handleSelectConversation = (conversation: Conversation) => {
     setCurrentConversation(conversation);
   };
+
+  useEffect(() => {
+    if (chatId && conversations.length > 0) {
+      handleSelectConversation(conversations[conversations.length - 1]);
+    }
+  }, [chatId]);
 
   return (
     <>
