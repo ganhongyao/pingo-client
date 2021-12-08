@@ -17,6 +17,7 @@ import { makeStyles } from "@mui/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addReceivedMessage,
+  addSentMessage,
   getAllConversations,
   getConversationByIndex,
 } from "../modules/conversations";
@@ -49,11 +50,12 @@ export default function Chats() {
 
   const handleSendMessage = () => {
     if (draftMessage) {
-      sendMessage(socket, {
+      const message = {
         sender: { name: name, socketId: socket.id },
         receiver: currentConversation!.otherUser,
         content: draftMessage.trim(),
-      });
+      };
+      sendMessage(socket, message);
       setDraftMessage("");
     }
   };
@@ -95,13 +97,30 @@ export default function Chats() {
           ))}
         </List>
         <Divider orientation="vertical" />
-        <Paper variant="outlined" style={{ width: "80%", padding: "20px" }}>
+        <Paper
+          variant="outlined"
+          style={{
+            width: "80%",
+            padding: "20px",
+          }}
+        >
           <Typography variant="h4" className={classes.name}>
             {currentConversation?.otherUser.name || "No chats selected"}
           </Typography>
-          {currentConversation?.messages.map((message, index) => (
-            <ChatMessage key={index} message={message} />
-          ))}
+          <div
+            style={{
+              height: "400px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column-reverse",
+            }}
+          >
+            <div>
+              {currentConversation?.messages.map((message, index) => (
+                <ChatMessage key={index} message={message} />
+              ))}
+            </div>
+          </div>
           {currentConversation && (
             <TextField
               autoFocus
