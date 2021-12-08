@@ -10,7 +10,7 @@ import {
 import { useSnackbar } from "notistack";
 import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
-import { PingIncoming, User } from "../types/user";
+import { PingIncoming, LocatableUser } from "../types/user";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import { queryFriendsLocations, updateLocation } from "../service/operations";
 import {
@@ -44,8 +44,9 @@ function Dashboard() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [lastUpdated, setLastUpdated] = useState(0);
-  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<Nullable<User>>(null);
+  const [onlineUsers, setOnlineUsers] = useState<LocatableUser[]>([]);
+  const [selectedUser, setSelectedUser] =
+    useState<Nullable<LocatableUser>>(null);
   const [openPing, setOpenPing] = useState<Nullable<PingIncoming>>(null);
   const [pingSendDialogIsOpen, setPingSendDialogIsOpen] = useState(false);
   const [pingReceiveDialogIsOpen, setPingReceiveDialogIsOpen] = useState(false);
@@ -96,9 +97,11 @@ function Dashboard() {
     if (name) {
       socket?.on(EVENT_FRIEND_LOCATIONS, (data) => {
         // Moves self to front so that legend displays self first before other users
-        const self = data.filter((user: User) => user.socketId === socket.id);
+        const self = data.filter(
+          (user: LocatableUser) => user.socketId === socket.id
+        );
         const otherUsers = data.filter(
-          (user: User) => user.socketId !== socket.id
+          (user: LocatableUser) => user.socketId !== socket.id
         );
         const allUsers = [...self, ...otherUsers];
         setOnlineUsers(allUsers);
@@ -150,7 +153,7 @@ function Dashboard() {
     return <div>Location not enabled.</div>;
   }
 
-  const handleSelectUser = (user: User) => {
+  const handleSelectUser = (user: LocatableUser) => {
     setSelectedUser(user);
   };
 

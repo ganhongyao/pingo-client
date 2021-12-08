@@ -14,14 +14,18 @@ import InboxIcon from "@mui/icons-material/Inbox";
 import { useEffect, useState } from "react";
 import ChatMessage from "../components/ChatMessage";
 import { makeStyles } from "@mui/styles";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
+  addReceivedMessage,
   getAllConversations,
   getConversationByIndex,
 } from "../modules/conversations";
 import { useNavigate, useParams } from "react-router";
 import { sendMessage } from "../service/operations";
-import { getCurrentUser } from "../modules/user";
+import useUserSocket from "../hooks/useUserSocket";
+import { EVENT_RECEIVE_MESSAGE } from "../service/events";
+import { Message } from "../types/message";
+import { useSnackbar } from "notistack";
 
 const useStyles = makeStyles((theme) => ({
   name: {
@@ -31,20 +35,22 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Chats() {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const conversations = useSelector(getAllConversations);
   const { chatId } = useParams();
   const currentConversation = useSelector(
     getConversationByIndex(Number(chatId))
   );
-  const { socket } = useSelector(getCurrentUser);
+  const { name, socket } = useUserSocket();
   const [draftMessage, setDraftMessage] = useState("");
 
   const handleSendMessage = () => {
     if (draftMessage) {
       sendMessage(socket, {
-        sender: currentConversation!.otherUser, // TODO: get current user
+        sender: { name: name, socketId: socket.id },
         receiver: currentConversation!.otherUser,
         content: draftMessage.trim(),
       });
@@ -61,6 +67,17 @@ export default function Chats() {
       handleSelectConversation(conversations.length - 1);
     }
   }, [chatId]);
+
+  useEffect(() => {
+    socket.on(EVENT_RECEIVE_MESSAGE, (message: Message) => {
+      dispatch(addReceivedMessage(message));
+      enqueueSnackbar("New message received", { variant: "info" });
+    });
+
+    return () => {
+      socket.removeAllListeners();
+    };
+  }, [socket]);
 
   return (
     <>
