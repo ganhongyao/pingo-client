@@ -17,6 +17,8 @@ export default function NamePrompt() {
   const [isOpen, setIsOpen] = useState(true);
   const [draftName, setDraftName] = useState("");
 
+  const isBlankName = draftName.trim().length === 0;
+
   const handleSubmit = () => {
     setIsOpen(false);
     updateName(socket, draftName.trim());
@@ -44,10 +46,14 @@ export default function NamePrompt() {
               handleSubmit();
             }
           }}
+          error={isBlankName}
+          helperText={isBlankName && "Name cannot be blank."}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleSubmit}>Proceed</Button>
+        <Button onClick={handleSubmit} disabled={isBlankName}>
+          Proceed
+        </Button>
       </DialogActions>
     </Dialog>
   );
