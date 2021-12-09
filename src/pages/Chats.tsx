@@ -6,6 +6,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
+  Typography,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -58,6 +60,7 @@ export default function Chats() {
     <Grid container flexDirection="row" spacing={3}>
       <Grid item xs={12} md={3}>
         <List>
+          <ListSubheader>Users</ListSubheader>
           {conversations.map((conversation, index) => (
             <ListItem disablePadding key={index}>
               <ListItemButton
@@ -73,6 +76,11 @@ export default function Chats() {
               </ListItemButton>
             </ListItem>
           ))}
+          {conversations.length === 0 && (
+            <Typography variant="caption">
+              Users whom you have messages with will appear here.
+            </Typography>
+          )}
         </List>
       </Grid>
       <Grid item xs={12} md={9}>

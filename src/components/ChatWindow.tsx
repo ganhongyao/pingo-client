@@ -48,7 +48,7 @@ export default function ChatWindow({ selectedConversation }: OwnProps) {
   return (
     <Paper elevation={2} className={classes.paper}>
       <Typography variant="h4" className={classes.name}>
-        {selectedConversation?.otherUser.name}
+        {selectedConversation?.otherUser.name || "No chats selected"}
       </Typography>
       <div className={classes.messagesContainer}>
         <div>
