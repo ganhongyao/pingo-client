@@ -13,7 +13,6 @@ function App() {
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <NamePrompt />
         <SnackbarProvider>
           <Routes>
             <Route path="/landing" element={<Landing />} />
