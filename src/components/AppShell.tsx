@@ -10,7 +10,7 @@ import { Box } from "@mui/system";
 import { useSnackbar } from "notistack";
 import { ReactNode, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Routes, Route, useNavigate } from "react-router";
+import { Routes, Route, useNavigate, Navigate } from "react-router";
 import useGeoLocation from "../hooks/useGeoLocation";
 import useUserSocket from "../hooks/useUserSocket";
 import { addReceivedMessage, addSentMessage } from "../modules/conversations";
@@ -181,6 +181,7 @@ export default function AppShell({ children }: OwnProps) {
         >
           <Toolbar />
           <Routes>
+            <Route element={<Navigate to="/dashboard" />} path="" />
             <Route element={<Dashboard />} path="dashboard" />
             <Route element={<Chats />} path="chats/" />
             <Route element={<Chats />} path="chats/:chatId" />
