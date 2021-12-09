@@ -10,7 +10,7 @@ import {
 import { useSnackbar } from "notistack";
 import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
-import { PingIncoming, LocatableUser } from "../types/user";
+import { LocatableUser } from "../types/user";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import { queryFriendsLocations, updateLocation } from "../service/operations";
 import {
@@ -26,6 +26,7 @@ import PingReceiveDialog from "../components/PingReceiveDialog";
 import { Nullable } from "../types/nullable";
 import { useSelector } from "react-redux";
 import { getCurrentUser } from "../modules/user";
+import { Ping } from "../types/ping";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -47,7 +48,7 @@ function Dashboard() {
   const [onlineUsers, setOnlineUsers] = useState<LocatableUser[]>([]);
   const [selectedUser, setSelectedUser] =
     useState<Nullable<LocatableUser>>(null);
-  const [openPing, setOpenPing] = useState<Nullable<PingIncoming>>(null);
+  const [openPing, setOpenPing] = useState<Nullable<Ping>>(null);
   const [pingSendDialogIsOpen, setPingSendDialogIsOpen] = useState(false);
   const [pingReceiveDialogIsOpen, setPingReceiveDialogIsOpen] = useState(false);
   const [viewport, setViewport] = useState<Viewport>({
@@ -68,7 +69,7 @@ function Dashboard() {
     return timeElapsed > LOCATION_UPDATE_TIME_INTERVAL;
   };
 
-  const handleOpenPing = (ping: PingIncoming) => {
+  const handleOpenPing = (ping: Ping) => {
     setOpenPing(ping);
     setPingReceiveDialogIsOpen(true);
   };
@@ -107,7 +108,7 @@ function Dashboard() {
         setOnlineUsers(allUsers);
       });
 
-      socket?.on(EVENT_PING, (incomingPing: PingIncoming) => {
+      socket?.on(EVENT_PING, (incomingPing: Ping) => {
         const { sender } = incomingPing;
         enqueueSnackbar(`${sender.name} pinged you`, {
           variant: "info",
@@ -163,7 +164,6 @@ function Dashboard() {
       <PingSendDialog
         isOpen={pingSendDialogIsOpen}
         setIsOpen={setPingSendDialogIsOpen}
-        socket={socket}
         receiver={selectedUser}
       />
       <PingReceiveDialog

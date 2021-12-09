@@ -12,13 +12,3 @@ export type UserSocket = {
   name: string;
   socket: Socket;
 };
-
-export type PingOutgoing = {
-  receiver: User;
-  message: string;
-};
-
-export type PingIncoming = {
-  sender: User;
-  message: string;
-};

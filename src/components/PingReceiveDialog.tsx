@@ -11,12 +11,12 @@ import { useNavigate } from "react-router-dom";
 import useUserSocket from "../hooks/useUserSocket";
 import { addReceivedMessage } from "../modules/conversations";
 import { Nullable } from "../types/nullable";
-import { PingIncoming } from "../types/user";
+import { Ping } from "../types/ping";
 
 interface OwnProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  incomingPing: Nullable<PingIncoming>;
+  incomingPing: Nullable<Ping>;
 }
 
 export default function PingReceiveDialog({

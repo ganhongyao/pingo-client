@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { Socket } from "socket.io-client";
+import useUserSocket from "../hooks/useUserSocket";
 import { pingFriend } from "../service/operations";
 import { Nullable } from "../types/nullable";
 import { User } from "../types/user";
@@ -16,7 +17,6 @@ import { User } from "../types/user";
 interface OwnProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  socket: Nullable<Socket>;
   receiver: Nullable<User>;
 }
 
@@ -25,9 +25,9 @@ const DEFAULT_INVITATION_MESSAGE = "Let's meet!";
 export default function PingSendDialog({
   isOpen,
   setIsOpen,
-  socket,
   receiver,
 }: OwnProps) {
+  const { name, socket } = useUserSocket();
   const [message, setMessage] = useState(DEFAULT_INVITATION_MESSAGE);
 
   if (!receiver) {
@@ -39,7 +39,11 @@ export default function PingSendDialog({
   };
 
   const handleSubmit = () => {
-    pingFriend(socket, { receiver: receiver, message: message });
+    pingFriend(socket, {
+      sender: { name: name, socketId: socket.id },
+      receiver: receiver,
+      message: message,
+    });
     handleClose();
     setMessage(DEFAULT_INVITATION_MESSAGE);
   };
