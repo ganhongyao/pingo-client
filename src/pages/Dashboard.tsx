@@ -2,34 +2,18 @@ import useGeoLocation from "../hooks/useGeoLocation";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
 import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
-import {
-  DEFAULT_MAP_CENTER,
-  LOCATION_UPDATE_TIME_INTERVAL,
-  MAPBOX_STYLE,
-} from "../util/constants";
-import { useSnackbar } from "notistack";
+import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
 import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 import { LocatableUser } from "../types/user";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
-import { queryFriendsLocations, updateLocation } from "../service/operations";
-import {
-  EVENT_FRIEND_CONNECTION,
-  EVENT_FRIEND_DISCONNECTION,
-  EVENT_FRIEND_LOCATIONS,
-  EVENT_FRIEND_LOCATION_UPDATE,
-  EVENT_PING,
-  EVENT_PING_ACCEPTED,
-} from "../service/events";
+
 import { makeStyles } from "@mui/styles";
 import PingSendDialog from "../components/PingSendDialog";
-import PingReceiveDialog from "../components/PingReceiveDialog";
 import { Nullable } from "../types/nullable";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { getCurrentUser } from "../modules/user";
-import { Ping } from "../types/ping";
-import { addSentMessage, getAllConversations } from "../modules/conversations";
-import { useNavigate } from "react-router-dom";
+import { getOnlineUsers } from "../modules/onlineUsers";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -43,19 +27,14 @@ const useStyles = makeStyles((theme) => ({
 
 function Dashboard() {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const location = useGeoLocation();
-  const { name, socket } = useSelector(getCurrentUser);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const [lastUpdated, setLastUpdated] = useState(0);
-  const [onlineUsers, setOnlineUsers] = useState<LocatableUser[]>([]);
+  const { socket } = useSelector(getCurrentUser);
+  const onlineUsers = useSelector(getOnlineUsers);
+
   const [selectedUser, setSelectedUser] =
     useState<Nullable<LocatableUser>>(null);
-  const [openPing, setOpenPing] = useState<Nullable<Ping>>(null);
   const [pingSendDialogIsOpen, setPingSendDialogIsOpen] = useState(false);
-  const [pingReceiveDialogIsOpen, setPingReceiveDialogIsOpen] = useState(false);
   const [viewport, setViewport] = useState<Viewport>({
     ...DEFAULT_MAP_CENTER,
     width: "75vw",
@@ -63,121 +42,16 @@ function Dashboard() {
     zoom: 12,
   });
 
-  const isUpdateDue = (lastUpdated: number): boolean => {
-    // Socket not available yet, unable to update anyway
-    if (!socket) {
-      return false;
-    }
-
-    const now = Date.now();
-    const timeElapsed = now - lastUpdated;
-    return timeElapsed > LOCATION_UPDATE_TIME_INTERVAL;
-  };
-
-  const handleOpenPing = (ping: Ping) => {
-    setOpenPing(ping);
-    setPingReceiveDialogIsOpen(true);
-  };
-
   // Update user location on map and on server
   useEffect(() => {
-    if (location && name) {
+    if (location) {
       setViewport((prevViewport) => ({
         ...prevViewport,
         latitude: location.latitude,
         longitude: location.longitude,
       }));
-
-      if (isUpdateDue(lastUpdated)) {
-        updateLocation(socket, location);
-        queryFriendsLocations(socket);
-
-        setLastUpdated(Date.now());
-      }
     }
-  }, [socket, location, name]);
-
-  // Listen for friend activity
-  useEffect(() => {
-    // Only allow access to friends' locations when name is set
-    if (name) {
-      socket?.on(EVENT_FRIEND_LOCATIONS, (data) => {
-        // Moves self to front so that legend displays self first before other users
-        const self = data.filter(
-          (user: LocatableUser) => user.socketId === socket.id
-        );
-        const otherUsers = data.filter(
-          (user: LocatableUser) => user.socketId !== socket.id
-        );
-        const allUsers = [...self, ...otherUsers];
-        setOnlineUsers(allUsers);
-      });
-
-      socket?.on(EVENT_PING, (incomingPing: Ping) => {
-        const { sender } = incomingPing;
-        enqueueSnackbar(`${sender.name} pinged you`, {
-          variant: "info",
-          action: (key) => (
-            <Button
-              className={classes.otherUser}
-              onClick={() => handleOpenPing(incomingPing)}
-            >
-              Respond
-            </Button>
-          ),
-        });
-      });
-
-      socket?.on(EVENT_PING_ACCEPTED, (sentPing: Ping) => {
-        const { receiver } = sentPing;
-        dispatch(
-          addSentMessage({
-            sender: sentPing.sender,
-            receiver: sentPing.receiver,
-            content: sentPing.message,
-          })
-        );
-        enqueueSnackbar(`${receiver.name} accepted your ping`, {
-          variant: "success",
-          action: (key) => (
-            <Button
-              className={classes.otherUser}
-              onClick={() => {
-                navigate("/chats/latest");
-              }}
-            >
-              Chat
-            </Button>
-          ),
-        });
-      });
-
-      socket?.on(EVENT_FRIEND_CONNECTION, (name: string) => {
-        const snackbarKey = enqueueSnackbar(`${name} is online!`, {
-          variant: "info",
-          onClick: () => closeSnackbar(snackbarKey),
-        });
-        queryFriendsLocations(socket);
-      });
-
-      socket?.on(EVENT_FRIEND_DISCONNECTION, () => {
-        queryFriendsLocations(socket);
-        if (selectedUser && !onlineUsers.includes(selectedUser)) {
-          // Selected user has disconnected
-          console.log("Selected user disconnected");
-          setSelectedUser(null);
-        }
-      });
-
-      socket?.on(EVENT_FRIEND_LOCATION_UPDATE, (location) => {
-        queryFriendsLocations(socket);
-      });
-    }
-
-    return () => {
-      socket?.removeAllListeners();
-    };
-  }, [socket, name]);
+  }, [location]);
 
   if (!location) {
     return <div>Location not enabled.</div>;
@@ -194,11 +68,6 @@ function Dashboard() {
         isOpen={pingSendDialogIsOpen}
         setIsOpen={setPingSendDialogIsOpen}
         receiver={selectedUser}
-      />
-      <PingReceiveDialog
-        isOpen={pingReceiveDialogIsOpen}
-        setIsOpen={setPingReceiveDialogIsOpen}
-        incomingPing={openPing}
       />
 
       <ReactMapGL
@@ -219,14 +88,14 @@ function Dashboard() {
                 longitude={user.location.longitude}
               >
                 <IconButton
-                  color={user.socketId === socket?.id ? "default" : "info"}
+                  color={user.socketId === socket.id ? "default" : "info"}
                   onClick={() => {
                     handleSelectUser(user);
                   }}
                 >
                   <FaceIcon />
                   <Typography>
-                    {user.socketId === socket?.id ? "You" : user.name}
+                    {user.socketId === socket.id ? "You" : user.name}
                   </Typography>
                 </IconButton>
               </Marker>
@@ -245,13 +114,13 @@ function Dashboard() {
             <Grid container direction="column" alignItems="center">
               <Grid item>
                 <Typography variant="h6">
-                  {selectedUser.socketId === socket?.id
+                  {selectedUser.socketId === socket.id
                     ? "You"
                     : selectedUser.name}
                 </Typography>
               </Grid>
               <Grid item>
-                {selectedUser.socketId !== socket?.id && (
+                {selectedUser.socketId !== socket.id && (
                   <Tooltip title={`Ping ${selectedUser.name}`}>
                     <IconButton
                       size="small"
@@ -284,7 +153,7 @@ function Dashboard() {
               <Grid item>
                 <FaceIcon
                   className={
-                    user.socketId === socket?.id
+                    user.socketId === socket.id
                       ? classes.self
                       : classes.otherUser
                   }
@@ -293,12 +162,10 @@ function Dashboard() {
               <Grid
                 item
                 className={
-                  user.socketId === socket?.id
-                    ? classes.self
-                    : classes.otherUser
+                  user.socketId === socket.id ? classes.self : classes.otherUser
                 }
               >
-                {user.socketId === socket?.id ? "You" : user.name}
+                {user.socketId === socket.id ? "You" : user.name}
               </Grid>
             </Button>
           </Grid>

@@ -8,7 +8,12 @@ import {
   Toolbar,
   Box,
 } from "@mui/material";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
+import ChatIcon from "@mui/icons-material/Chat";
+import MapIcon from "@mui/icons-material/Map";
+import PeopleIcon from "@mui/icons-material/People";
+import HistoryIcon from "@mui/icons-material/History";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -20,15 +25,15 @@ type DrawerListItem = {
 };
 
 const drawerListMainItems: DrawerListItem[] = [
-  { text: "Dashboard", link: "/dashboard", icon: <InboxIcon /> },
-  { text: "Chats", link: "/chats", icon: <InboxIcon /> },
-  { text: "Friends", link: "/friends", icon: <InboxIcon /> },
-  { text: "Past Hangouts", link: "/historyg", icon: <InboxIcon /> },
+  { text: "Dashboard", link: "/dashboard", icon: <MapIcon /> },
+  { text: "Chats", link: "/chats", icon: <ChatIcon /> },
+  { text: "Friends", link: "/friends", icon: <PeopleIcon /> },
+  { text: "Past Hangouts", link: "/history", icon: <HistoryIcon /> },
 ];
 
 const drawerListSecondaryItems: DrawerListItem[] = [
-  { text: "Settings", link: "/settings", icon: <InboxIcon /> },
-  { text: "Log out", link: "/logout", icon: <InboxIcon /> },
+  { text: "Settings", link: "/settings", icon: <SettingsIcon /> },
+  { text: "Log out", link: "/logout", icon: <LogoutIcon /> },
 ];
 
 export default function AppDrawer() {
