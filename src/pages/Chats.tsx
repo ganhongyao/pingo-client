@@ -1,64 +1,37 @@
 import {
-  Box,
-  Divider,
+  Grid,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
-  TextField,
-  Typography,
 } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
-import { useEffect, useState } from "react";
-import ChatMessage from "../components/ChatMessage";
-import { makeStyles } from "@mui/styles";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addReceivedMessage,
-  addSentMessage,
   getAllConversations,
   getConversationByIndex,
 } from "../modules/conversations";
 import { useNavigate, useParams } from "react-router";
-import { sendMessage } from "../service/operations";
 import useUserSocket from "../hooks/useUserSocket";
 import { EVENT_RECEIVE_MESSAGE } from "../service/events";
 import { Message } from "../types/message";
 import { useSnackbar } from "notistack";
-
-const useStyles = makeStyles((theme) => ({
-  name: {
-    marginBottom: "10px",
-  },
-}));
+import ChatWindow from "../components/ChatWindow";
 
 export default function Chats() {
-  const classes = useStyles();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const conversations = useSelector(getAllConversations);
   const { chatId } = useParams();
-  const currentConversation = useSelector(
+  const selectedConversation = useSelector(
     getConversationByIndex(Number(chatId))
   );
-  const { name, socket } = useUserSocket();
-  const [draftMessage, setDraftMessage] = useState("");
-
-  const handleSendMessage = () => {
-    if (draftMessage) {
-      const message = {
-        sender: { name: name, socketId: socket.id },
-        receiver: currentConversation!.otherUser,
-        content: draftMessage.trim(),
-      };
-      sendMessage(socket, message);
-      setDraftMessage("");
-    }
-  };
+  const { socket } = useUserSocket();
 
   const handleSelectConversation = (index: number) => {
     navigate(`/chats/${index}`);
@@ -82,9 +55,9 @@ export default function Chats() {
   }, [socket]);
 
   return (
-    <>
-      <Box sx={{ display: "flex" }}>
-        <List style={{ width: "20%" }}>
+    <Grid container flexDirection="row" spacing={1}>
+      <Grid item xs={12} md={3}>
+        <List>
           {conversations.map((conversation, index) => (
             <ListItem disablePadding key={index}>
               <ListItemButton onClick={() => handleSelectConversation(index)}>
@@ -96,50 +69,10 @@ export default function Chats() {
             </ListItem>
           ))}
         </List>
-        <Divider orientation="vertical" />
-        <Paper
-          variant="outlined"
-          style={{
-            width: "80%",
-            padding: "20px",
-          }}
-        >
-          <Typography variant="h4" className={classes.name}>
-            {currentConversation?.otherUser.name || "No chats selected"}
-          </Typography>
-          <div
-            style={{
-              height: "400px",
-              overflow: "auto",
-              display: "flex",
-              flexDirection: "column-reverse",
-            }}
-          >
-            <div>
-              {currentConversation?.messages.map((message, index) => (
-                <ChatMessage key={index} message={message} />
-              ))}
-            </div>
-          </div>
-          {currentConversation && (
-            <TextField
-              autoFocus
-              margin="dense"
-              id="message"
-              label="Message"
-              type="text"
-              fullWidth
-              value={draftMessage}
-              onChange={(e) => setDraftMessage(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSendMessage();
-                }
-              }}
-            />
-          )}
-        </Paper>
-      </Box>
-    </>
+      </Grid>
+      <Grid item xs={12} md={9}>
+        <ChatWindow selectedConversation={selectedConversation} />
+      </Grid>
+    </Grid>
   );
 }
