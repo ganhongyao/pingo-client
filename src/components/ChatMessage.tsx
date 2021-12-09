@@ -4,22 +4,23 @@ import useUserSocket from "../hooks/useUserSocket";
 import { Message } from "../types/message";
 
 const useStyles = makeStyles((theme) => ({
-  sentMessageContainer: {
+  messageContainer: {
     display: "flex",
+    marginBottom: "10px",
+  },
+
+  sentMessageContainer: {
     flexDirection: "row-reverse",
     alignSelf: "flex-end",
   },
 
-  receivedMessageContainer: {
-    display: "flex",
-  },
+  receivedMessageContainer: {},
 
   message: {
     display: "flex",
     alignItems: "center",
     borderRadius: "15px",
     padding: "10px 20px",
-    marginBottom: "12px",
   },
 
   sentMessage: {
@@ -42,11 +43,14 @@ export default function ChatMessage({ message }: OwnProps) {
 
   return (
     <div
-      className={
-        isSender
-          ? classes.sentMessageContainer
-          : classes.receivedMessageContainer
-      }
+      className={`
+        ${classes.messageContainer}
+        ${
+          isSender
+            ? classes.sentMessageContainer
+            : classes.receivedMessageContainer
+        }
+      `}
     >
       <Typography
         className={`${classes.message} ${

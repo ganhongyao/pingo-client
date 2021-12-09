@@ -48,7 +48,14 @@ export default function Chats() {
   useEffect(() => {
     socket.on(EVENT_RECEIVE_MESSAGE, (message: Message) => {
       dispatch(addReceivedMessage(message));
-      enqueueSnackbar("New message received", { variant: "info" });
+      if (
+        message.sender.socketId !== selectedConversation?.otherUser.socketId
+      ) {
+        // Only show notification if the message is not from the open conversation
+        enqueueSnackbar(`New message from ${message.sender.name} `, {
+          variant: "info",
+        });
+      }
     });
 
     return () => {

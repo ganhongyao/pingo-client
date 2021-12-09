@@ -143,7 +143,7 @@ function Dashboard() {
             <Button
               className={classes.otherUser}
               onClick={() => {
-                navigate(`/chats/latest`);
+                navigate("/chats/latest");
               }}
             >
               Chat
@@ -154,7 +154,7 @@ function Dashboard() {
 
       socket?.on(EVENT_FRIEND_CONNECTION, (name: string) => {
         const snackbarKey = enqueueSnackbar(`${name} is online!`, {
-          variant: "success",
+          variant: "info",
           onClick: () => closeSnackbar(snackbarKey),
         });
         queryFriendsLocations(socket);
