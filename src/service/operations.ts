@@ -7,6 +7,7 @@ import { Message } from "../types/message";
 import { Nullable } from "../types/nullable";
 import { Ping } from "../types/ping";
 import {
+  EVENT_ACCEPT_PING,
   EVENT_PING_FRIEND,
   EVENT_QUERY_FRIEND_LOCATIONS,
   EVENT_SEND_MESSAGE,
@@ -44,6 +45,13 @@ export function pingFriend(socket: Nullable<Socket>, ping: Ping): void {
     throw new Error("Socket is not initialized");
   }
   socket.emit(EVENT_PING_FRIEND, ping);
+}
+
+export function acceptPing(socket: Nullable<Socket>, ping: Ping): void {
+  if (!socket) {
+    throw new Error("Socket is not initialized");
+  }
+  socket.emit(EVENT_ACCEPT_PING, ping);
 }
 
 export function sendMessage(socket: Nullable<Socket>, message: Message): void {

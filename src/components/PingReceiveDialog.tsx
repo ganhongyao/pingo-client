@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useUserSocket from "../hooks/useUserSocket";
 import { addReceivedMessage } from "../modules/conversations";
+import { acceptPing } from "../service/operations";
 import { Nullable } from "../types/nullable";
 import { Ping } from "../types/ping";
 
@@ -28,6 +29,10 @@ export default function PingReceiveDialog({
   const navigate = useNavigate();
   const { name, socket } = useUserSocket();
 
+  if (!incomingPing) {
+    return null;
+  }
+
   const handleClose = () => {
     setIsOpen(false);
   };
@@ -37,20 +42,17 @@ export default function PingReceiveDialog({
   };
 
   const handleAccept = () => {
+    acceptPing(socket, incomingPing);
     dispatch(
       addReceivedMessage({
-        sender: incomingPing!.sender,
+        sender: incomingPing.sender,
         receiver: { name: name, socketId: socket.id },
-        content: incomingPing!.message,
+        content: incomingPing.message,
       })
     );
     handleClose();
     navigate("/chats/latest");
   };
-
-  if (!incomingPing) {
-    return null;
-  }
 
   const { sender, message } = incomingPing;
 

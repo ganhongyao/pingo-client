@@ -19,14 +19,17 @@ import {
   EVENT_FRIEND_LOCATIONS,
   EVENT_FRIEND_LOCATION_UPDATE,
   EVENT_PING,
+  EVENT_PING_ACCEPTED,
 } from "../service/events";
 import { makeStyles } from "@mui/styles";
 import PingSendDialog from "../components/PingSendDialog";
 import PingReceiveDialog from "../components/PingReceiveDialog";
 import { Nullable } from "../types/nullable";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUser } from "../modules/user";
 import { Ping } from "../types/ping";
+import { addSentMessage, getAllConversations } from "../modules/conversations";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -40,6 +43,8 @@ const useStyles = makeStyles((theme) => ({
 
 function Dashboard() {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const location = useGeoLocation();
   const { name, socket } = useSelector(getCurrentUser);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -118,6 +123,30 @@ function Dashboard() {
               onClick={() => handleOpenPing(incomingPing)}
             >
               Respond
+            </Button>
+          ),
+        });
+      });
+
+      socket?.on(EVENT_PING_ACCEPTED, (sentPing: Ping) => {
+        const { receiver } = sentPing;
+        dispatch(
+          addSentMessage({
+            sender: sentPing.sender,
+            receiver: sentPing.receiver,
+            content: sentPing.message,
+          })
+        );
+        enqueueSnackbar(`${receiver.name} accepted your ping`, {
+          variant: "success",
+          action: (key) => (
+            <Button
+              className={classes.otherUser}
+              onClick={() => {
+                navigate(`/chats/latest`);
+              }}
+            >
+              Chat
             </Button>
           ),
         });
