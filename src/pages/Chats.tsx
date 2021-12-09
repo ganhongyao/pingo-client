@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Grid,
   List,
   ListItem,
@@ -6,7 +7,6 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import InboxIcon from "@mui/icons-material/Inbox";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -55,14 +55,19 @@ export default function Chats() {
   }, [socket]);
 
   return (
-    <Grid container flexDirection="row" spacing={1}>
+    <Grid container flexDirection="row" spacing={3}>
       <Grid item xs={12} md={3}>
         <List>
           {conversations.map((conversation, index) => (
             <ListItem disablePadding key={index}>
-              <ListItemButton onClick={() => handleSelectConversation(index)}>
+              <ListItemButton
+                onClick={() => handleSelectConversation(index)}
+                selected={Number(chatId) === index}
+              >
                 <ListItemIcon>
-                  <InboxIcon />
+                  <Avatar>
+                    {conversation.otherUser.name.charAt(0).toUpperCase()}
+                  </Avatar>
                 </ListItemIcon>
                 <ListItemText primary={conversation.otherUser.name} />
               </ListItemButton>
