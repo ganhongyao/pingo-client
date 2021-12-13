@@ -3,7 +3,15 @@ import ReactMapGL, { Marker, Popup } from "react-map-gl";
 import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
 import { DEFAULT_MAP_CENTER, MAPBOX_STYLE } from "../util/constants";
-import { Button, Grid, IconButton, Tooltip, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Button,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 import { LocatableUser } from "../types/user";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
@@ -14,6 +22,7 @@ import { Nullable } from "../types/nullable";
 import { useSelector } from "react-redux";
 import { getCurrentUser } from "../modules/user";
 import { getOnlineUsers } from "../modules/onlineUsers";
+import { getCurrentLocation } from "../modules/geolocation";
 
 const useStyles = makeStyles((theme) => ({
   otherUser: {
@@ -27,10 +36,10 @@ const useStyles = makeStyles((theme) => ({
 
 function Dashboard() {
   const classes = useStyles();
-  const location = useGeoLocation();
 
   const { socket } = useSelector(getCurrentUser);
   const onlineUsers = useSelector(getOnlineUsers);
+  const location = useSelector(getCurrentLocation);
 
   const [selectedUser, setSelectedUser] =
     useState<Nullable<LocatableUser>>(null);
@@ -53,16 +62,26 @@ function Dashboard() {
     }
   }, [location]);
 
-  if (!location) {
-    return <div>Location not enabled.</div>;
-  }
-
   const handleSelectUser = (user: LocatableUser) => {
     setSelectedUser(user);
   };
 
   return (
     <>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!location}
+      >
+        <Grid container flexDirection="column" alignItems="center">
+          <Grid item>
+            <CircularProgress color="inherit" />
+          </Grid>
+          <Grid item>
+            <Typography variant="h6">Getting your location...</Typography>
+          </Grid>
+        </Grid>
+      </Backdrop>
+
       {/* Dialogs */}
       <PingSendDialog
         isOpen={pingSendDialogIsOpen}
