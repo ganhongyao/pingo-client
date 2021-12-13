@@ -8,7 +8,6 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
-import { Socket } from "socket.io-client";
 import useUserSocket from "../hooks/useUserSocket";
 import { pingFriend } from "../service/operations";
 import { Nullable } from "../types/nullable";

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import { AppState, store } from "../store";
+import { AppState } from "../store";
 import { LocatableUser } from "../types/user";
 
 interface OnlineUsersState {

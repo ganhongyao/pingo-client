@@ -4,7 +4,6 @@ import { SnackbarProvider } from "notistack";
 import { Provider } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AppShell from "./components/AppShell";
-import NamePrompt from "./components/NamePrompt";
 import Landing from "./pages/Landing";
 import theme from "./theme";
 import { store } from "./store";

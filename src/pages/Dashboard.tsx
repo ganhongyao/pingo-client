@@ -1,4 +1,3 @@
-import useGeoLocation from "../hooks/useGeoLocation";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
 import { useEffect, useState } from "react";
 import { Viewport } from "../types/viewport";
